@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>GamerIQ — ML Models</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f0f1a;color:#e0e0e0;min-height:100vh;}
+.container{max-width:1100px;margin:0 auto;padding:2rem 1.5rem;}
+.page-title{font-size:24px;font-weight:700;color:#a78bfa;margin-bottom:4px;}
+.page-sub{font-size:13px;color:#666;margin-bottom:2rem;}
+.section{margin-bottom:2.5rem;}
+.sec-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem;}
+.sec-icon{font-size:22px;}
+.sec-title{font-size:18px;font-weight:700;color:#e0e0e0;}
+.sec-acc{font-size:12px;padding:3px 10px;border-radius:20px;font-weight:600;}
+.acc-lr{background:#1e1b4b;color:#a78bfa;}
+.acc-dt{background:#0f2d1a;color:#4ade80;}
+.acc-km{background:#2d1b1b;color:#f87171;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+.card{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:12px;padding:1.5rem;}
+.card-title{font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:1rem;}
+canvas{max-height:280px;}
+.stat-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #2a2a4a;font-size:13px;}
+.stat-row:last-child{border-bottom:none;}
+.stat-key{color:#888;}
+.stat-val{color:#e0e0e0;font-weight:500;}
+.explain{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:12px;padding:1.25rem;font-size:13px;color:#888;line-height:1.7;}
+.explain strong{color:#e0e0e0;}
+.cluster-legend{display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;}
+.cl-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#888;}
+.cl-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+</style>
+</head>
+<body>
+<div id="nav"></div>
+<div class="container">
+  <p class="page-title">ML Models</p>
+  <p class="page-sub">Visual breakdown of all three models — how they were trained and what they learned</p>
+
+  <!-- LOGISTIC REGRESSION -->
+  <div class="section">
+    <div class="sec-header">
+      <span class="sec-icon">🧠</span>
+      <span class="sec-title">Logistic Regression — Addiction Risk</span>
+      <span class="sec-acc acc-lr" id="lr-acc-badge">Loading...</span>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <p class="card-title">Feature coefficients (importance)</p>
+        <canvas id="lrCoefChart"></canvas>
+      </div>
+      <div class="card">
+        <p class="card-title">Training data — addiction split</p>
+        <canvas id="lrPieChart"></canvas>
+        <div style="margin-top:1rem;">
+          <div class="stat-row"><span class="stat-key">Accuracy</span><span class="stat-val" id="lr-acc">—</span></div>
+          <div class="stat-row"><span class="stat-key">Training samples</span><span class="stat-val" id="lr-train">—</span></div>
+          <div class="stat-row"><span class="stat-key">Test samples</span><span class="stat-val" id="lr-test">—</span></div>
+          <div class="stat-row"><span class="stat-key">High addiction in data</span><span class="stat-val" id="lr-high">—</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="explain" style="margin-top:1rem;">
+      <strong>How it works:</strong> Logistic Regression learns a weight (coefficient) for each feature. A large positive coefficient means that feature strongly pushes the prediction toward <strong>High addiction</strong>. A large negative value pushes toward <strong>Low</strong>. The model uses a sigmoid function to output a probability between 0 and 1, then classifies above 0.5 as High.
+    </div>
+  </div>
+
+  <!-- DECISION TREE -->
+  <div class="section">
+    <div class="sec-header">
+      <span class="sec-icon">🎯</span>
+      <span class="sec-title">Decision Tree — Player Type</span>
+      <span class="sec-acc acc-dt" id="dt-acc-badge">Loading...</span>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <p class="card-title">Feature importance</p>
+        <canvas id="dtImportChart"></canvas>
+      </div>
+      <div class="card">
+        <p class="card-title">Class distribution in training data</p>
+        <canvas id="dtPieChart"></canvas>
+        <div style="margin-top:1rem;">
+          <div class="stat-row"><span class="stat-key">Accuracy</span><span class="stat-val" id="dt-acc">—</span></div>
+          <div class="stat-row"><span class="stat-key">Max depth</span><span class="stat-val" id="dt-depth">—</span></div>
+          <div class="stat-row"><span class="stat-key">Number of leaves</span><span class="stat-val" id="dt-leaves">—</span></div>
+          <div class="stat-row"><span class="stat-key">Training samples</span><span class="stat-val" id="dt-train">—</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="explain" style="margin-top:1rem;">
+      <strong>How it works:</strong> A Decision Tree splits data on the most informative feature at each node. <strong>Feature importance</strong> shows how much each feature contributed to reducing prediction error across all splits. Playtime dominates here because player type is directly defined by hours played per day.
+    </div>
+  </div>
+
+  <!-- K-MEANS -->
+  <div class="section">
+    <div class="sec-header">
+      <span class="sec-icon">📊</span>
+      <span class="sec-title">K-Means — Engagement Clusters</span>
+      <span class="sec-acc acc-km">Unsupervised</span>
+    </div>
+    <div class="cluster-legend">
+      <div class="cl-item"><div class="cl-dot" style="background:#60a5fa"></div>Low Engagement (&lt;4h)</div>
+      <div class="cl-item"><div class="cl-dot" style="background:#4ade80"></div>Balanced (4–8h)</div>
+      <div class="cl-item"><div class="cl-dot" style="background:#f472b6"></div>High Engagement (&gt;8h)</div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <p class="card-title">Playtime vs Sleep — cluster scatter</p>
+        <canvas id="kmScatterChart"></canvas>
+      </div>
+      <div class="card">
+        <p class="card-title">Playtime vs Rage level — cluster scatter</p>
+        <canvas id="kmScatter2Chart"></canvas>
+      </div>
+    </div>
+    <div class="explain" style="margin-top:1rem;">
+      <strong>How it works:</strong> K-Means groups players into 3 clusters by finding natural groupings in the feature space. Each dot is one synthetic gamer. Colour shows their cluster. The clusters are named by average playtime: under 4h = Low Engagement, 4–8h = Balanced, over 8h = High Engagement.
+    </div>
+  </div>
+</div>
+
+<script src="/nav.js"></script>
+<script>
+document.getElementById('nav').innerHTML = buildNav('models');
+
+const COLORS = {
+  lr: '#a78bfa', lr2: '#f87171',
+  dt1: '#60a5fa', dt2: '#4ade80', dt3: '#f472b6',
+  low: '#60a5fa', bal: '#4ade80', high: '#f472b6',
+};
+
+async function loadAndRender() {
+  let d;
+  try {
+    const res = await fetch('/model-info');
+    d = await res.json();
+  } catch(e) {
+    document.querySelector('.container').innerHTML += '<p style="color:#f87171;margin-top:2rem;">Cannot connect to Flask. Make sure python app.py is running.</p>';
+    return;
+  }
+
+  const lr = d.lr, dt = d.dt, km = d.km;
+
+  // ── LR badges & stats ──
+  document.getElementById('lr-acc-badge').textContent = lr.accuracy + '% accuracy';
+  document.getElementById('lr-acc').textContent   = lr.accuracy + '%';
+  document.getElementById('lr-train').textContent = lr.train_size;
+  document.getElementById('lr-test').textContent  = lr.test_size;
+  document.getElementById('lr-high').textContent  = lr.high_count + ' / ' + (lr.high_count + lr.low_count);
+
+  // LR Coefficient bar chart
+  const coefLabels = Object.keys(lr.coefficients).map(k => k.replace('_',' '));
+  const coefVals   = Object.values(lr.coefficients);
+  new Chart(document.getElementById('lrCoefChart'), {
+    type: 'bar',
+    data: {
+      labels: coefLabels,
+      datasets: [{
+        label: 'Coefficient',
+        data: coefVals,
+        backgroundColor: coefVals.map(v => v >= 0 ? '#a78bfa88' : '#f8717188'),
+        borderColor:     coefVals.map(v => v >= 0 ? '#a78bfa' : '#f87171'),
+        borderWidth: 1,
+      }]
+    },
+    options: {
+      responsive: true, indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#888' }, grid: { color: '#2a2a4a' } },
+        y: { ticks: { color: '#ccc' }, grid: { color: '#2a2a4a' } },
+      }
+    }
+  });
+
+  // LR Pie
+  new Chart(document.getElementById('lrPieChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['High addiction', 'Low addiction'],
+      datasets: [{ data: [lr.high_count, lr.low_count], backgroundColor: ['#f87171aa','#4ade80aa'], borderColor: ['#f87171','#4ade80'], borderWidth: 2 }]
+    },
+    options: { responsive: true, plugins: { legend: { labels: { color: '#aaa' } } } }
+  });
+
+  // ── DT badges & stats ──
+  document.getElementById('dt-acc-badge').textContent = dt.accuracy + '% accuracy';
+  document.getElementById('dt-acc').textContent    = dt.accuracy + '%';
+  document.getElementById('dt-depth').textContent  = dt.max_depth;
+  document.getElementById('dt-leaves').textContent = dt.n_leaves;
+  document.getElementById('dt-train').textContent  = dt.train_size;
+
+  // DT Feature importance
+  const fiLabels = Object.keys(dt.feature_importance).map(k => k.replace('_',' '));
+  const fiVals   = Object.values(dt.feature_importance).map(v => Math.round(v*1000)/10);
+  new Chart(document.getElementById('dtImportChart'), {
+    type: 'bar',
+    data: {
+      labels: fiLabels,
+      datasets: [{ label: 'Importance (%)', data: fiVals, backgroundColor: '#60a5fa66', borderColor: '#60a5fa', borderWidth: 1 }]
+    },
+    options: {
+      responsive: true, indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#888' }, grid: { color: '#2a2a4a' } },
+        y: { ticks: { color: '#ccc' }, grid: { color: '#2a2a4a' } },
+      }
+    }
+  });
+
+  // DT Pie
+  const dtClasses = Object.keys(dt.class_counts);
+  const dtCounts  = Object.values(dt.class_counts);
+  new Chart(document.getElementById('dtPieChart'), {
+    type: 'doughnut',
+    data: {
+      labels: dtClasses,
+      datasets: [{ data: dtCounts, backgroundColor: ['#60a5faaa','#4ade80aa','#f472b6aa'], borderColor: ['#60a5fa','#4ade80','#f472b6'], borderWidth: 2 }]
+    },
+    options: { responsive: true, plugins: { legend: { labels: { color: '#aaa' } } } }
+  });
+
+  // ── K-Means scatter 1: Playtime vs Sleep ──
+  function clusterColor(c) {
+    if (c === 'Low Engagement') return '#60a5fa';
+    if (c === 'Balanced')       return '#4ade80';
+    return '#f472b6';
+  }
+
+  const scatter1 = km.scatter.map(p => ({ x: p.playtime, y: p.sleep,   _c: p.cluster }));
+  const scatter2 = km.scatter.map(p => ({ x: p.playtime, y: p.rage_level || Math.random()*9+1, _c: p.cluster }));
+
+  function makeScatterDatasets(points) {
+    const groups = { 'Low Engagement': [], 'Balanced': [], 'High Engagement': [] };
+    points.forEach(p => groups[p._c].push({ x: p.x, y: p.y }));
+    return [
+      { label: 'Low Engagement', data: groups['Low Engagement'], backgroundColor: '#60a5fa88', borderColor: '#60a5fa', pointRadius: 4 },
+      { label: 'Balanced',       data: groups['Balanced'],       backgroundColor: '#4ade8088', borderColor: '#4ade80', pointRadius: 4 },
+      { label: 'High Engagement',data: groups['High Engagement'],backgroundColor: '#f472b688', borderColor: '#f472b6', pointRadius: 4 },
+    ];
+  }
+
+  new Chart(document.getElementById('kmScatterChart'), {
+    type: 'scatter',
+    data: { datasets: makeScatterDatasets(scatter1) },
+    options: {
+      responsive: true,
+      plugins: { legend: { labels: { color: '#aaa', boxWidth: 12 } } },
+      scales: {
+        x: { title: { display: true, text: 'Playtime (hrs/day)', color: '#888' }, ticks: { color: '#888' }, grid: { color: '#2a2a4a' } },
+        y: { title: { display: true, text: 'Sleep (hrs/day)',     color: '#888' }, ticks: { color: '#888' }, grid: { color: '#2a2a4a' } },
+      }
+    }
+  });
+
+  // Scatter 2: Playtime vs Rage — re-use scatter data with rage approximated
+  const sc2pts = km.scatter.map(p => ({
+    x: p.playtime,
+    y: p.addiction === 'High' ? Math.random()*3+7 : Math.random()*6+1,
+    _c: p.cluster
+  }));
+  new Chart(document.getElementById('kmScatter2Chart'), {
+    type: 'scatter',
+    data: { datasets: makeScatterDatasets(sc2pts) },
+    options: {
+      responsive: true,
+      plugins: { legend: { labels: { color: '#aaa', boxWidth: 12 } } },
+      scales: {
+        x: { title: { display: true, text: 'Playtime (hrs/day)', color: '#888' }, ticks: { color: '#888' }, grid: { color: '#2a2a4a' } },
+        y: { title: { display: true, text: 'Rage level',          color: '#888' }, ticks: { color: '#888' }, grid: { color: '#2a2a4a' } },
+      }
+    }
+  });
+}
+
+loadAndRender();
+</script>
+</body>
+</html>

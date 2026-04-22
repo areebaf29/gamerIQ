@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>GamerIQ — History</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f0f1a;color:#e0e0e0;min-height:100vh;}
+.container{max-width:1200px;margin:0 auto;padding:2rem 1.5rem;}
+.page-title{font-size:24px;font-weight:700;color:#a78bfa;margin-bottom:4px;}
+.page-sub{font-size:13px;color:#666;margin-bottom:1.5rem;}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:1.5rem;}
+.stat{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:10px;padding:1rem 1.25rem;}
+.sl{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:5px;}
+.sv{font-size:22px;font-weight:700;}
+.sv.p{color:#695a97;}.sv.r{color:#f87171;}.sv.g{color:#4ade80;}
+.controls{display:flex;gap:10px;margin-bottom:1rem;flex-wrap:wrap;}
+select.filter{padding:7px 12px;background:#1a1a2e;border:1px solid #2a2a4a;border-radius:8px;color:#e0e0e0;font-size:13px;outline:none;}
+.rbtn{padding:7px 14px;border:1px solid #2a2a4a;background:#1a1a2e;border-radius:8px;cursor:pointer;color:#aaa;font-size:13px;}
+.rbtn:hover{background:#2a2a4a;}
+.card{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:12px;overflow:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.04em;padding:11px 12px;border-bottom:1px solid #2a2a4a;background:#161626;white-space:nowrap;}
+td{padding:10px 12px;border-bottom:1px solid #1a1a2e;color:#e0e0e0;vertical-align:middle;white-space:nowrap;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#1e1e3a;}
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;}
+.bh{background:#2d0f0f;color:#f87171;}.bl{background:#0f2d1a;color:#4ade80;}
+.bc{background:#0f1d3a;color:#60a5fa;}.bco{background:#2d250f;color:#fbbf24;}.bhc{background:#2d0f1a;color:#f472b6;}
+.ble{background:#1a1a2e;color:#666;}.bba{background:#0f2d1a;color:#4ade80;}.bhe{background:#1e1b4b;color:#a78bfa;}
+.av{width:26px;height:26px;border-radius:50%;background:#a78bfa;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;margin-right:6px;vertical-align:middle;}
+.empty{text-align:center;padding:3rem;color:#555;font-size:14px;}
+</style>
+</head>
+<body>
+<div id="nav"></div>
+<div class="container">
+  <p class="page-title">History</p>
+  <p class="page-sub">All predictions from all users — compare and analyse patterns</p>
+  <div class="stats">
+    <div class="stat"><p class="sl">Total predictions</p><p class="sv p" id="s-total">—</p></div>
+    <div class="stat"><p class="sl">High addiction</p><p class="sv r" id="s-high">—</p></div>
+    <div class="stat"><p class="sl">Low addiction</p><p class="sv g" id="s-low">—</p></div>
+    <div class="stat"><p class="sl">Avg playtime</p><p class="sv" id="s-play">—</p></div>
+    <div class="stat"><p class="sl">Avg sleep</p><p class="sv" id="s-sleep">—</p></div>
+  </div>
+  <div class="controls">
+    <select class="filter" id="fAdd" onchange="filter()"><option value="">All addiction</option><option value="High">High</option><option value="Low">Low</option></select>
+    <select class="filter" id="fPly" onchange="filter()"><option value="">All player types</option><option value="Casual">Casual</option><option value="Competitive">Competitive</option><option value="Hardcore">Hardcore</option></select>
+    <select class="filter" id="fCls" onchange="filter()"><option value="">All clusters</option><option value="Low Engagement">Low Engagement</option><option value="Balanced">Balanced</option><option value="High Engagement">High Engagement</option></select>
+    <select class="filter" id="fCat" onchange="filter()"><option value="">All categories</option><option value="Casual">Casual gamers</option><option value="Professional">Professional gamers</option></select>
+    <button class="rbtn" onclick="load()">↻ Refresh</button>
+  </div>
+  <div class="card">
+    <table>
+      <thead><tr>
+        <th>#</th><th>Player</th><th>Age</th><th>Gender</th><th>Category</th>
+        <th>Game</th><th>Play</th><th>Sleep</th><th>Days</th><th>Rage</th>
+        <th>Prod.Drop</th><th>Addiction</th><th>Type</th><th>Cluster</th><th>Date</th>
+      </tr></thead>
+      <tbody id="tbody"><tr><td colspan="15" class="empty">Loading...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+<script src="/nav.js"></script>
+<script>
+document.getElementById('nav').innerHTML = buildNav('history');
+let all = [];
+
+function badge(f,v){
+  if(f==='add') return v==='High'?'badge bh':'badge bl';
+  if(f==='ply'){if(v==='Casual')return'badge bc';if(v==='Competitive')return'badge bco';return'badge bhc';}
+  if(f==='cls'){if(v==='Low Engagement')return'badge ble';if(v==='Balanced')return'badge bba';return'badge bhe';}
+}
+
+function filter(){
+  const fa=document.getElementById('fAdd').value;
+  const fp=document.getElementById('fPly').value;
+  const fc=document.getElementById('fCls').value;
+  const fcat=document.getElementById('fCat').value;
+  let rows=all;
+  if(fa) rows=rows.filter(r=>r.addiction===fa);
+  if(fp) rows=rows.filter(r=>r.player_type===fp);
+  if(fc) rows=rows.filter(r=>r.cluster===fc);
+  if(fcat) rows=rows.filter(r=>r.player_category===fcat);
+  render(rows);
+}
+
+function render(rows){
+  if(!rows.length){document.getElementById('tbody').innerHTML='<tr><td colspan="15" class="empty">No records found.</td></tr>';return;}
+  document.getElementById('tbody').innerHTML=rows.map(r=>`<tr>
+    <td style="color:#444">${r.id}</td>
+    <td><span class="av">${r.name[0].toUpperCase()}</span>${r.name}</td>
+    <td>${r.age}</td><td>${r.gender}</td>
+    <td><span style="font-size:11px;padding:2px 8px;border-radius:20px;background:${r.player_category==='Professional'?'#0f2d1a':'#0f1d3a'};color:${r.player_category==='Professional'?'#4ade80':'#60a5fa'}">${r.player_category}</span></td>
+    <td>${r.game_type}</td>
+    <td>${r.playtime}h</td><td>${r.sleep}h</td><td>${r.gaming_days}d</td><td>${r.rage_level}</td>
+    <td>${r.productivity_drop}%</td>
+    <td><span class="${badge('add',r.addiction)}">${r.addiction}</span></td>
+    <td><span class="${badge('ply',r.player_type)}">${r.player_type}</span></td>
+    <td><span class="${badge('cls',r.cluster)}">${r.cluster}</span></td>
+    <td style="color:#444;font-size:11px">${r.created?r.created.slice(0,16):'—'}</td>
+  </tr>`).join('');
+}
+
+async function load(){
+  try{
+    const res=await fetch('/records');
+    all=await res.json();
+    const total=all.length;
+    const high=all.filter(r=>r.addiction==='High').length;
+    const low=total-high;
+    const ap=total?(all.reduce((s,r)=>s+r.playtime,0)/total).toFixed(1):'—';
+    const as_=total?(all.reduce((s,r)=>s+r.sleep,0)/total).toFixed(1):'—';
+    document.getElementById('s-total').textContent=total;
+    document.getElementById('s-high').textContent=high;
+    document.getElementById('s-low').textContent=low;
+    document.getElementById('s-play').textContent=total?ap+'h':'—';
+    document.getElementById('s-sleep').textContent=total?as_+'h':'—';
+    filter();
+  }catch(e){
+    document.getElementById('tbody').innerHTML='<tr><td colspan="15" class="empty">Cannot connect to Flask.</td></tr>';
+  }
+}
+load();
+</script>
+</body>
+</html>

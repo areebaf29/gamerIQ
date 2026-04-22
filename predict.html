@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>GamerIQ — Predict</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f0f1a;color:#e0e0e0;min-height:100vh;}
+.container{max-width:960px;margin:0 auto;padding:2rem 1.5rem;}
+.page-title{font-size:24px;font-weight:700;color:#a78bfa;margin-bottom:4px;}
+.page-sub{font-size:13px;color:#666;margin-bottom:1.5rem;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start;}
+.card{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:12px;padding:1.5rem;}
+.card-title{font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:1rem;}
+.field{margin-bottom:12px;}
+label{font-size:12px;color:#888;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em;}
+input,select{width:100%;padding:9px 12px;background:#0a0a14;border:1px solid #2a2a4a;border-radius:8px;color:#e0e0e0;font-size:14px;outline:none;transition:border 0.2s;}
+input:focus,select:focus{border-color:#a78bfa;}
+input.err{border-color:#f87171;}
+select option{background:#1a1a2e;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.hint{font-size:11px;color:#555;margin-top:3px;}
+.hint.warn{color:#f87171;}
+.prod-box{background:#0a0a14;border:1px solid #2a2a4a;border-radius:8px;padding:9px 12px;font-size:15px;color:#a78bfa;font-weight:700;}
+.prod-sub{font-size:11px;color:#555;margin-top:3px;}
+.alert{background:#2d0f0f;border:1px solid #7f1d1d;border-radius:8px;padding:10px 14px;font-size:13px;color:#f87171;margin-bottom:12px;display:none;line-height:1.6;}
+.cat-banner{border-radius:8px;padding:9px 14px;font-size:12px;margin-bottom:12px;display:none;}
+.cat-banner.casual{background:#0f1d3a;border:1px solid #1e3a5f;color:#60a5fa;}
+.cat-banner.pro{background:#0f2d1a;border:1px solid #1e4a2a;color:#4ade80;}
+button#submitBtn{width:100%;padding:11px;background:#a78bfa;color:white;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px;transition:background 0.2s;}
+button#submitBtn:hover{background:#8b5cf6;}
+button#submitBtn:disabled{background:#333;cursor:not-allowed;}
+.result-card{background:#0a0a14;border:1px solid #2a2a4a;border-radius:10px;padding:1.25rem;margin-top:1rem;display:none;}
+.rrow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #1a1a2e;}
+.rrow:last-child{border-bottom:none;}
+.rlabel{font-size:13px;color:#888;}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;}
+.bh{background:#2d0f0f;color:#f87171;}
+.bl{background:#0f2d1a;color:#4ade80;}
+.bc{background:#0f1d3a;color:#60a5fa;}
+.bco{background:#2d250f;color:#fbbf24;}
+.bhc{background:#2d0f1a;color:#f472b6;}
+.ble{background:#1a1a2e;color:#666;}
+.bba{background:#0f2d1a;color:#4ade80;}
+.bhe{background:#1e1b4b;color:#a78bfa;}
+.bp{background:#1e1b4b;color:#a78bfa;}
+/* Right panel */
+.info-box{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:12px;padding:1.5rem;}
+.info-item{display:flex;gap:12px;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid #2a2a4a;}
+.info-item:last-child{margin:0;padding:0;border:none;}
+.ii-icon{font-size:20px;flex-shrink:0;margin-top:2px;}
+.ii-title{font-size:13px;font-weight:600;color:#e0e0e0;margin-bottom:3px;}
+.ii-desc{font-size:12px;color:#666;line-height:1.55;}
+.tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;margin-top:5px;}
+.tlr{background:#1e1b4b;color:#a78bfa;}
+.tdt{background:#0f2d1a;color:#4ade80;}
+.tkm{background:#2d1b1b;color:#f87171;}
+.total-hint{font-size:12px;margin-top:6px;margin-bottom:10px;}
+</style>
+</head>
+<body>
+<div id="nav"></div>
+<div class="container">
+  <p class="page-title">Predict</p>
+  <p class="page-sub">Enter your gaming habits — three ML models will analyse them instantly</p>
+  <div class="grid">
+    <div>
+      <div class="card">
+        <p class="card-title">Personal info</p>
+        <div class="row2">
+          <div class="field"><label>Full name</label><input id="name" type="text" placeholder="e.g. Saniya"/></div>
+          <div class="field"><label>Age</label><input id="age" type="number" min="10" max="60" placeholder="22"/></div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>Gender</label>
+            <select id="gender"><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select>
+          </div>
+          <div class="field">
+            <label>Player category</label>
+            <select id="player_category" onchange="onCat()">
+              <option value="">Select</option>
+              <option value="Casual">Casual</option>
+              <option value="Professional">Professional</option>
+            </select>
+          </div>
+        </div>
+        <div class="cat-banner" id="catBanner"></div>
+
+        <p class="card-title" style="margin-top:0.5rem;">Gaming habits</p>
+        <div id="alertBox" class="alert"></div>
+        <div class="row2">
+          <div class="field">
+            <label>Playtime (hrs/day)</label>
+            <input id="playtime" type="number" min="0.5" max="16" step="0.5" placeholder="7" oninput="onHours()"/>
+            <p class="hint" id="ph">0.5 – 16 hrs</p>
+          </div>
+          <div class="field">
+            <label>Sleep (hrs/day)</label>
+            <input id="sleep" type="number" min="3" max="12" step="0.5" placeholder="6" oninput="onHours()"/>
+            <p class="hint" id="sh">3 – 12 hrs</p>
+          </div>
+        </div>
+        <p class="total-hint" id="totalHint"></p>
+        <div class="row2">
+          <div class="field"><label>Gaming days/week</label><input id="gaming_days" type="number" min="1" max="7" placeholder="5"/></div>
+          <div class="field"><label>Rage level (1–10)</label><input id="rage_level" type="number" min="1" max="10" placeholder="6"/></div>
+        </div>
+        <div class="field">
+          <label>Game type</label>
+          <select id="game_type"><option>FPS</option><option>RPG</option><option>MOBA</option><option>Sports</option><option>Puzzle</option><option>Battle Royale</option></select>
+        </div>
+        <div class="field">
+          <label>Productivity drop (auto)</label>
+          <div class="prod-box" id="prodBox">— fill playtime & category</div>
+          <p class="prod-sub" id="prodSub"></p>
+        </div>
+        <button id="submitBtn" onclick="submit()">Run Prediction →</button>
+      </div>
+
+      <div class="result-card" id="resultCard">
+        <p class="card-title" style="margin-bottom:0.75rem;">Prediction result</p>
+        <div class="rrow"><span class="rlabel">🧠 Addiction risk</span><span id="r-add" class="badge"></span></div>
+        <div class="rrow"><span class="rlabel">🎯 Player type</span><span id="r-ply" class="badge"></span></div>
+        <div class="rrow"><span class="rlabel">📊 Cluster</span><span id="r-cls" class="badge"></span></div>
+        <div class="rrow"><span class="rlabel">📉 Productivity drop</span><span id="r-prod" class="badge bp"></span></div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <p class="card-title">How predictions work</p>
+      <div class="info-item">
+        <div class="ii-icon">🧠</div>
+        <div>
+          <p class="ii-title">Addiction Risk — Logistic Regression</p>
+          <p class="ii-desc">High if: playtime ≥ 7h/day, OR playtime ≥ 5h + sleep &lt; 6h, OR playtime ≥ 5h + rage ≥ 7, OR productivity drop ≥ 50%.</p>
+          <span class="tag tlr">Logistic Regression · ~95% acc</span>
+        </div>
+      </div>
+      <div class="info-item">
+        <div class="ii-icon">🎯</div>
+        <div>
+          <p class="ii-title">Player Type — Decision Tree</p>
+          <p class="ii-desc">Casual: &lt;3h/day · Competitive: 3–6h/day · Hardcore: &gt;6h/day. Trained on 2,000 synthetic profiles.</p>
+          <span class="tag tdt">Decision Tree · ~100% acc</span>
+        </div>
+      </div>
+      <div class="info-item">
+        <div class="ii-icon">📊</div>
+        <div>
+          <p class="ii-title">Engagement Cluster — K-Means</p>
+          <p class="ii-desc">Low Engagement: &lt;4h · Balanced: 4–8h · High Engagement: &gt;8h. Groups players by overall gaming intensity.</p>
+          <span class="tag tkm">K-Means · 3 clusters</span>
+        </div>
+      </div>
+      <div class="info-item">
+        <div class="ii-icon">📉</div>
+        <div>
+          <p class="ii-title">Productivity Drop — Auto calculated</p>
+          <p class="ii-desc"><strong>Casual:</strong> (playtime − 3) × 8% + sleep penalty if &lt;6h.<br><strong>Professional:</strong> always 0% — gaming is the job.</p>
+        </div>
+      </div>
+      <div class="info-item">
+        <div class="ii-icon">📋</div>
+        <div>
+          <p class="ii-title">Train-test split explained</p>
+          <p class="ii-desc">2,000 synthetic rows generated → 80% used to train models → 20% held out to measure accuracy. The final model trains on all 2,000 rows for best predictions.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/nav.js"></script>
+<script>
+document.getElementById('nav').innerHTML = buildNav('predict');
+
+function onCat() {
+  const cat = document.getElementById('player_category').value;
+  const b   = document.getElementById('catBanner');
+  if (!cat) { b.style.display='none'; return; }
+  b.style.display = 'block';
+  if (cat === 'Casual') {
+    b.className = 'cat-banner casual';
+    b.textContent = '🎮 Casual — gaming for fun. Productivity drop calculated from playtime & sleep.';
+  } else {
+    b.className = 'cat-banner pro';
+    b.textContent = '🏆 Professional — gaming is your career. Productivity drop is always 0%.';
+  }
+  updateProd();
+}
+
+function onHours() {
+  const p = parseFloat(document.getElementById('playtime').value)||0;
+  const s = parseFloat(document.getElementById('sleep').value)||0;
+  const ph = document.getElementById('ph');
+  const sh = document.getElementById('sh');
+  const th = document.getElementById('totalHint');
+  ph.className = p > 16 ? 'hint warn' : 'hint';
+  ph.textContent = p > 16 ? '⚠ Max 16 hrs' : '0.5 – 16 hrs';
+  sh.className = (s<3||s>12) ? 'hint warn' : 'hint';
+  sh.textContent = (s<3||s>12) ? '⚠ Must be 3–12 hrs' : '3 – 12 hrs';
+  if (p && s) {
+    const total = p + s;
+    th.style.color = total > 24 ? '#f87171' : '#555';
+    th.textContent = total > 24
+      ? `⚠ Total ${total.toFixed(1)}h exceeds 24h — please reduce playtime or sleep`
+      : `Total: ${total.toFixed(1)}h play+sleep · ${(24-total).toFixed(1)}h remaining`;
+  }
+  updateProd();
+}
+
+function updateProd() {
+  const cat = document.getElementById('player_category').value;
+  const p   = parseFloat(document.getElementById('playtime').value)||0;
+  const s   = parseFloat(document.getElementById('sleep').value)||0;
+  const box = document.getElementById('prodBox');
+  const sub = document.getElementById('prodSub');
+  if (!cat || !p) { box.textContent='— fill playtime & category'; sub.textContent=''; return; }
+  if (cat === 'Professional') {
+    box.textContent = '0%';
+    sub.textContent = 'Professional gamers earn from gaming — no productivity loss.';
+  } else {
+    const pp = Math.max(0, p-3)*8;
+    const sp = s>0 && s<6 ? (6-s)*7 : 0;
+    const drop = Math.min(100, Math.round(pp+sp));
+    box.textContent = drop + '%';
+    sub.textContent = `Play penalty ${Math.round(pp)}% + Sleep penalty ${Math.round(sp)}% = ${drop}%`;
+  }
+}
+
+function badgeClass(field, val) {
+  if (field==='add') return val==='High'?'badge bh':'badge bl';
+  if (field==='ply') { if(val==='Casual')return'badge bc'; if(val==='Competitive')return'badge bco'; return'badge bhc'; }
+  if (field==='cls') { if(val==='Low Engagement')return'badge ble'; if(val==='Balanced')return'badge bba'; return'badge bhe'; }
+}
+
+function validate() {
+  const name = document.getElementById('name').value.trim();
+  const age  = parseInt(document.getElementById('age').value);
+  const gender = document.getElementById('gender').value;
+  const cat  = document.getElementById('player_category').value;
+  const p    = parseFloat(document.getElementById('playtime').value);
+  const s    = parseFloat(document.getElementById('sleep').value);
+  const gd   = parseInt(document.getElementById('gaming_days').value);
+  const rage = parseInt(document.getElementById('rage_level').value);
+  const errs = [];
+  if (!name)              errs.push('Name is required');
+  if (!age||age<10||age>60) errs.push('Age must be 10–60');
+  if (!gender)            errs.push('Select a gender');
+  if (!cat)               errs.push('Select a player category');
+  if (!p||p<0.5||p>16)   errs.push('Playtime must be 0.5–16 hrs');
+  if (!s||s<3||s>12)     errs.push('Sleep must be 3–12 hrs');
+  if (p+s > 24)           errs.push('Playtime + sleep cannot exceed 24 hrs');
+  if (!gd||gd<1||gd>7)   errs.push('Gaming days must be 1–7');
+  if (!rage||rage<1||rage>10) errs.push('Rage level must be 1–10');
+  const ab = document.getElementById('alertBox');
+  if (errs.length) { ab.innerHTML = errs.map(e=>'⚠ '+e).join('<br>'); ab.style.display='block'; return false; }
+  ab.style.display='none'; return true;
+}
+
+async function submit() {
+  if (!validate()) return;
+  const btn = document.getElementById('submitBtn');
+  btn.textContent='Analysing...'; btn.disabled=true;
+  const cat = document.getElementById('player_category').value;
+  const p   = parseFloat(document.getElementById('playtime').value);
+  const s   = parseFloat(document.getElementById('sleep').value);
+  const pp  = Math.max(0,p-3)*8;
+  const sp  = s<6?(6-s)*7:0;
+  const drop = cat==='Professional'?0:Math.min(100,Math.round(pp+sp));
+  const payload = {
+    name: document.getElementById('name').value.trim(),
+    age:  parseInt(document.getElementById('age').value),
+    gender: document.getElementById('gender').value,
+    player_category: cat,
+    playtime: p, sleep: s,
+    gaming_days: parseInt(document.getElementById('gaming_days').value),
+    game_type: document.getElementById('game_type').value,
+    rage_level: parseInt(document.getElementById('rage_level').value),
+    productivity_drop: drop,
+  };
+  try {
+    const res = await fetch('/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const d = await res.json();
+    if (d.error){alert('Error: '+d.error);btn.textContent='Run Prediction →';btn.disabled=false;return;}
+    document.getElementById('r-add').textContent = d.addiction_risk;
+    document.getElementById('r-add').className   = badgeClass('add',d.addiction_risk);
+    document.getElementById('r-ply').textContent = d.player_type;
+    document.getElementById('r-ply').className   = badgeClass('ply',d.player_type);
+    document.getElementById('r-cls').textContent = d.cluster;
+    document.getElementById('r-cls').className   = badgeClass('cls',d.cluster);
+    document.getElementById('r-prod').textContent = d.productivity_drop+'%';
+    document.getElementById('resultCard').style.display='block';
+    document.getElementById('resultCard').scrollIntoView({behavior:'smooth'});
+  } catch(e){alert('Cannot connect to Flask. Make sure python app.py is running.');}
+  btn.textContent='Run Prediction →'; btn.disabled=false;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>GamerIQ — Home</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f0f1a;color:#e0e0e0;min-height:100vh;}
+.hero{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:4rem 2rem;text-align:center;border-bottom:1px solid #2a2a4a;}
+.hero h1{font-size:40px;font-weight:700;color:#a78bfa;margin-bottom:12px;}
+.hero p{font-size:16px;color:#aaa;max-width:540px;margin:0 auto 2rem;line-height:1.6;}
+.hero-btn{display:inline-block;background:#a78bfa;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;transition:background 0.2s;}
+.hero-btn:hover{background:#8b5cf6;}
+.container{max-width:1000px;margin:0 auto;padding:3rem 1.5rem;}
+.section-title{font-size:22px;font-weight:600;color:#e0e0e0;margin-bottom:0.5rem;}
+.section-sub{font-size:14px;color:#666;margin-bottom:2rem;}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:3rem;}
+.card{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:12px;padding:1.5rem;}
+.card-icon{font-size:28px;margin-bottom:12px;}
+.card h3{font-size:16px;font-weight:600;color:#e0e0e0;margin-bottom:8px;}
+.card p{font-size:13px;color:#888;line-height:1.6;}
+.card .tag{display:inline-block;margin-top:12px;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;}
+.tag-lr{background:#1e1b4b;color:#a78bfa;}
+.tag-dt{background:#1c3a2e;color:#4ade80;}
+.tag-km{background:#2d1b1b;color:#f87171;}
+.how{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:12px;padding:2rem;margin-bottom:3rem;}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1.5rem;}
+.step{text-align:center;}
+.step-num{width:36px;height:36px;border-radius:50%;background:#a78bfa;color:white;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;}
+.step h4{font-size:13px;font-weight:600;color:#e0e0e0;margin-bottom:4px;}
+.step p{font-size:12px;color:#888;}
+.step-arrow{display:flex;align-items:center;justify-content:center;color:#444;font-size:20px;padding-top:18px;}
+.fields-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;}
+.field-card{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:10px;padding:1rem 1.25rem;display:flex;gap:12px;align-items:flex-start;}
+.field-icon{font-size:20px;margin-top:2px;}
+.field-card h4{font-size:14px;font-weight:600;color:#e0e0e0;margin-bottom:3px;}
+.field-card p{font-size:12px;color:#888;line-height:1.5;}
+.user-card{background:#1a1a2e;border:1px solid #a78bfa44;border-radius:12px;padding:1.5rem;margin-bottom:2rem;display:flex;align-items:center;gap:1.5rem;}
+.avatar{width:56px;height:56px;border-radius:50%;background:#a78bfa;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:white;flex-shrink:0;}
+.user-info h2{font-size:18px;font-weight:600;color:#e0e0e0;}
+.user-info p{font-size:13px;color:#888;margin-top:3px;}
+.pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;background:#1e1b4b;color:#a78bfa;margin-left:8px;}
+</style>
+</head>
+<body>
+<div id="navHolder"></div>
+
+<div class="hero">
+  <h1>Know Your Game</h1>
+  <p>GamerIQ uses machine learning to predict gaming addiction risk, player type, and engagement cluster — based on your real gaming habits.</p>
+  <a href="predict.html" class="hero-btn">Start Prediction →</a>
+</div>
+
+<div class="container">
+
+  <div class="user-card" id="userCard"></div>
+
+  <!-- What it predicts -->
+  <p class="section-title">What GamerIQ predicts</p>
+  <p class="section-sub">Three ML models run in parallel on every submission</p>
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">🧠</div>
+      <h3>Addiction Risk</h3>
+      <p>Detects whether your gaming habits show signs of addiction based on playtime, sleep deprivation, and rage patterns.</p>
+      <span class="tag tag-lr">Logistic Regression · ~95% acc</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">🎯</div>
+      <h3>Player Type</h3>
+      <p>Classifies you as Casual, Competitive, or Hardcore based on how much time you invest in gaming each day.</p>
+      <span class="tag tag-dt">Decision Tree · ~100% acc</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">📊</div>
+      <h3>Engagement Cluster</h3>
+      <p>Groups you with similar players — Low Engagement, Balanced, or High Engagement — using unsupervised clustering.</p>
+      <span class="tag tag-km">K-Means · 3 clusters</span>
+    </div>
+  </div>
+
+  <!-- How it works -->
+  <div class="how">
+    <p class="section-title">How it works</p>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><h4>Register</h4><p>Create your account with name, age & gender</p></div>
+      <div class="step-arrow">→</div>
+      <div class="step"><div class="step-num">2</div><h4>Submit data</h4><p>Fill in your gaming habits on the Predict page</p></div>
+      <div class="step-arrow">→</div>
+      <div class="step"><div class="step-num">3</div><h4>ML runs</h4><p>3 models analyse your data instantly</p></div>
+      <div class="step-arrow">→</div>
+      <div class="step"><div class="step-num">4</div><h4>Results</h4><p>View predictions and full history</p></div>
+    </div>
+  </div>
+
+  <!-- Input fields explained -->
+  <p class="section-title">What each field means</p>
+  <p class="section-sub">Every input you provide is used as a feature by the ML models</p>
+  <div class="fields-grid">
+    <div class="field-card"><div class="field-icon">⏱️</div><div><h4>Playtime (hours/day)</h4><p>How many hours you play games on an average day. This is the strongest signal for player type and addiction.</p></div></div>
+    <div class="field-card"><div class="field-icon">😴</div><div><h4>Sleep (hours/day)</h4><p>Hours of sleep you get. Low sleep combined with high playtime is a major addiction indicator.</p></div></div>
+    <div class="field-card"><div class="field-icon">📅</div><div><h4>Gaming days/week</h4><p>How many days per week you game. Affects engagement cluster classification.</p></div></div>
+    <div class="field-card"><div class="field-icon">🕹️</div><div><h4>Game type</h4><p>The genre you play most (FPS, RPG, MOBA etc.). Stored for analysis but rage patterns differ by genre.</p></div></div>
+    <div class="field-card"><div class="field-icon">😡</div><div><h4>Rage level (1–10)</h4><p>How often you rage/get angry while gaming. High rage + low sleep + high playtime = strong addiction signal.</p></div></div>
+    <div class="field-card"><div class="field-icon">📉</div><div><h4>Productivity drop (%)</h4><p>How much your work/study productivity has dropped due to gaming. Used in all three model predictions.</p></div></div>
+  </div>
+
+</div>
+
+<script src="nav.js"></script>
+<script>
+requireLogin();
+document.getElementById('navHolder').innerHTML = buildNav('home');
+const user = getUser();
+if (user) {
+  document.getElementById('userCard').innerHTML = `
+    <div class="avatar">${user.name[0].toUpperCase()}</div>
+    <div class="user-info">
+      <h2>${user.name} <span class="pill">${user.gender}</span></h2>
+      <p>Age ${user.age} · @${user.username} · Ready to analyse your gaming habits</p>
+    </div>`;
+}
+</script>
+</body>
+</html>

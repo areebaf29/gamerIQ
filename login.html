@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Gamer Analytics — Login</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f0f1a;min-height:100vh;display:flex;align-items:center;justify-content:center;}
+.box{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:16px;padding:2.5rem 2rem;width:100%;max-width:420px;}
+.logo{text-align:center;margin-bottom:2rem;}
+.logo h1{color:#a78bfa;font-size:24px;font-weight:700;letter-spacing:-0.5px;}
+.logo p{color:#666;font-size:13px;margin-top:4px;}
+.tabs{display:flex;background:#0f0f1a;border-radius:8px;padding:4px;margin-bottom:1.5rem;gap:4px;}
+.tab{flex:1;padding:8px;text-align:center;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;color:#888;border:none;background:transparent;transition:all 0.2s;}
+.tab.active{background:#a78bfa;color:white;}
+.field{margin-bottom:14px;}
+label{font-size:12px;color:#888;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.04em;}
+input,select{width:100%;padding:10px 12px;background:#0f0f1a;border:1px solid #2a2a4a;border-radius:8px;color:#e0e0e0;font-size:14px;outline:none;transition:border 0.2s;}
+input:focus,select:focus{border-color:#a78bfa;}
+select option{background:#1a1a2e;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+button.submit{width:100%;padding:11px;background:#a78bfa;color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;margin-top:6px;transition:background 0.2s;}
+button.submit:hover{background:#8b5cf6;}
+.msg{font-size:13px;text-align:center;margin-top:12px;padding:8px;border-radius:6px;display:none;}
+.msg.error{background:#2d0f0f;color:#f87171;}
+.msg.success{background:#0f2d1a;color:#4ade80;}
+.form-section{display:none;}
+.form-section.active{display:block;}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="logo">
+    <h1>🎮 GamerIQ</h1>
+    <p>Gaming addiction & behaviour analytics</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('login')">Login</button>
+    <button class="tab" onclick="switchTab('register')">Register</button>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="form-section active" id="loginForm">
+    <div class="field"><label>Username</label><input type="text" id="l-username" placeholder="Enter username"/></div>
+    <div class="field"><label>Password</label><input type="password" id="l-password" placeholder="Enter password"/></div>
+    <button class="submit" onclick="doLogin()">Login</button>
+    <div class="msg" id="loginMsg"></div>
+  </div>
+
+  <!-- REGISTER -->
+  <div class="form-section" id="registerForm">
+    <div class="row2">
+      <div class="field"><label>Full name</label><input type="text" id="r-name" placeholder="John Doe"/></div>
+      <div class="field"><label>Age</label><input type="number" id="r-age" placeholder="22" min="10" max="80"/></div>
+    </div>
+    <div class="field">
+      <label>Gender</label>
+      <select id="r-gender"><option value="">Select gender</option><option>Male</option><option>Female</option><option>Other</option></select>
+    </div>
+    <div class="field"><label>Username</label><input type="text" id="r-username" placeholder="Choose a username"/></div>
+    <div class="field"><label>Password</label><input type="password" id="r-password" placeholder="Choose a password"/></div>
+    <button class="submit" onclick="doRegister()">Create account</button>
+    <div class="msg" id="registerMsg"></div>
+  </div>
+</div>
+
+<script>
+const BASE = '';
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
+  document.getElementById('loginForm').classList.toggle('active', tab==='login');
+  document.getElementById('registerForm').classList.toggle('active', tab==='register');
+}
+
+function showMsg(id, text, type) {
+  const el = document.getElementById(id);
+  el.textContent = text; el.className = 'msg ' + type; el.style.display = 'block';
+}
+
+async function doLogin() {
+  const username = document.getElementById('l-username').value.trim();
+  const password = document.getElementById('l-password').value;
+  if (!username || !password) return showMsg('loginMsg', 'Please fill all fields', 'error');
+  try {
+    const res = await fetch(BASE+'/login', {method:'POST', credentials:'include',
+      headers:{'Content-Type':'application/json'}, body: JSON.stringify({username, password})});
+    const d = await res.json();
+    if (!res.ok) return showMsg('loginMsg', d.error, 'error');
+    localStorage.setItem('user', JSON.stringify(d.user));
+    showMsg('loginMsg', 'Welcome back, ' + d.user.name + '!', 'success');
+    setTimeout(() => window.location.href = 'home.html', 800);
+  } catch(e) { showMsg('loginMsg', 'Cannot connect to server', 'error'); }
+}
+
+async function doRegister() {
+  const name = document.getElementById('r-name').value.trim();
+  const age  = parseInt(document.getElementById('r-age').value);
+  const gender = document.getElementById('r-gender').value;
+  const username = document.getElementById('r-username').value.trim();
+  const password = document.getElementById('r-password').value;
+  if (!name||!age||!gender||!username||!password) return showMsg('registerMsg','Please fill all fields','error');
+  try {
+    const res = await fetch(BASE+'/register', {method:'POST',
+      headers:{'Content-Type':'application/json'}, body: JSON.stringify({name,age,gender,username,password})});
+    const d = await res.json();
+    if (!res.ok) return showMsg('registerMsg', d.error, 'error');
+    showMsg('registerMsg', 'Account created! Please login.', 'success');
+    setTimeout(() => switchTab('login'), 1200);
+  } catch(e) { showMsg('registerMsg', 'Cannot connect to server', 'error'); }
+}
+</script>
+</body>
+</html>
