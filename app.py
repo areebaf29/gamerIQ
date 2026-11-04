@@ -84,7 +84,7 @@ def train_models():
     lr_acc = float(lr.score(Xte_s, yte))
     print(f"[ML] Logistic Regression : {lr_acc:.2%}")
 
-    # --- Random Forest (tuned to stay 94-96%) ---
+    # --- Random Forest ---
     rf = RandomForestClassifier(n_estimators=40, max_depth=4, max_features='sqrt',
                                  min_samples_leaf=8, random_state=7)
     rf.fit(Xtr, ytr)
@@ -131,6 +131,7 @@ def train_models():
 
 print("\n[ML] Training models...")
 LR,LE_ADD,SCALER,RF,DT,LE_PLY,LR_INFO,RF_INFO,DT_INFO,KM_INFO = train_models()
+N_ROWS = LR_INFO["train_size"] + LR_INFO["test_size"]  # rows actually used for training/testing
 print("[ML] All models ready.\n")
 
 # =============================================================================
@@ -358,17 +359,17 @@ def page_predict():
       <div class="ii"><div style="font-size:20px;flex-shrink:0;margin-top:2px">🧠</div><div>
         <p class="ii-t">Logistic Regression — Addiction</p>
         <p class="ii-d">Learns a weight per feature. Uses sigmoid to output probability. Fast and interpretable.</p>
-        <span class="tag tlr">~95% accuracy</span></div></div>
+        <span class="tag tlr">{LR_INFO["accuracy"]}% test accuracy</span></div></div>
       <div class="ii"><div style="font-size:20px;flex-shrink:0;margin-top:2px">🌲</div><div>
         <p class="ii-t">Random Forest — Addiction (comparison)</p>
         <p class="ii-d">Builds 40 decision trees on random subsets and takes a majority vote. More robust to noise.</p>
-        <span class="tag trf">~94–95% accuracy</span></div></div>
+        <span class="tag trf">{RF_INFO["accuracy"]}% test accuracy</span></div></div>
       <div class="ii"><div style="font-size:20px;flex-shrink:0;margin-top:2px">🎯</div><div>
         <p class="ii-t">Decision Tree — Player Type</p>
         <p class="ii-d">Casual &lt;3h · Competitive 3–6h · Hardcore &gt;6h/day.</p>
-        <span class="tag tdt">~99% accuracy</span></div></div>
+        <span class="tag tdt">{DT_INFO["accuracy"]}% test accuracy</span></div></div>
       <div class="ii"><div style="font-size:20px;flex-shrink:0;margin-top:2px">📊</div><div>
-        <p class="ii-t">K-Means — Cluster</p>
+        <p class="ii-t">Engagement Cluster (playtime rule)</p>
         <p class="ii-d">Low &lt;4h · Balanced 4–8h · High Engagement &gt;8h/day.</p>
         <span class="tag tkm">3 clusters</span></div></div>
       <div class="ii"><div style="font-size:20px;flex-shrink:0;margin-top:2px">📉</div><div>
@@ -376,7 +377,7 @@ def page_predict():
         <p class="ii-d">Casual: (playtime−3)×8% + sleep penalty if &lt;6h. Professional: always 0%.</p></div></div>
       <div class="ii"><div style="font-size:20px;flex-shrink:0;margin-top:2px">📋</div><div>
         <p class="ii-t">Train-Test Split</p>
-        <p class="ii-d">2,000 synthetic rows → 80% train / 20% test. Final model uses all data. 6% noise added so accuracy stays 94–96%.</p></div></div>
+        <p class="ii-d">{N_ROWS:,} synthetic rows (2,000 generated, rows with playtime + sleep over 24h dropped) → 80% train / 20% test. Models are fitted on the 80% training split only and scored on the 20% test split. 6% of addiction-risk labels are flipped at random as noise; player type is a direct playtime rule.</p></div></div>
     </div>
   </div>
 </div>
@@ -664,12 +665,12 @@ canvas{{max-height:260px;}}
         </div>
       </div>
     </div>
-    <div class="exp"><strong>Decision Tree:</strong> Splits on the most informative feature at each node. Playtime dominates because player type is directly defined by hours/day. The tree reaches full accuracy at depth 5.</div>
+    <div class="exp"><strong>Decision Tree:</strong> Splits on the most informative feature at each node. Playtime dominates because player type is directly defined by hours/day. The fitted tree needs only {DT_INFO["max_depth"]} levels because player type is a direct playtime rule.</div>
   </div>
 
   <!-- K-Means -->
   <div class="sec">
-    <div class="sh"><span class="si">📊</span><span class="st">K-Means — Engagement Clusters</span><span class="sa akm">3 clusters · unsupervised</span></div>
+    <div class="sh"><span class="si">📊</span><span class="st">Engagement Clusters</span><span class="sa akm">3 clusters · playtime rule</span></div>
     <div class="leg">
       <div class="li"><div class="ld" style="background:#6366f1"></div>Low Engagement (&lt;4h)</div>
       <div class="li"><div class="ld" style="background:#16a34a"></div>Balanced (4–8h)</div>
@@ -679,7 +680,7 @@ canvas{{max-height:260px;}}
       <div class="card"><p class="ct">Playtime vs Sleep (training data)</p><canvas id="km1"></canvas></div>
       <div class="card"><p class="ct">Playtime vs Productivity Drop</p><canvas id="km2"></canvas></div>
     </div>
-    <div class="exp"><strong>K-Means:</strong> Each dot = one synthetic gamer. Colour = cluster. Clear vertical bands show clusters separated mainly by playtime, with sleep and productivity as secondary signals.</div>
+    <div class="exp"><strong>Clusters:</strong> Each dot = one synthetic gamer. Colour = cluster. Clusters are assigned by fixed playtime thresholds (under 4h, 4 to 8h, over 8h), so they form vertical bands. No K-Means model is fitted.</div>
   </div>
 </div>
 
